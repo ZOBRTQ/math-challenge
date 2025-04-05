@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数学强国挑战赛</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #e74c3c;
+            font-size: 2.2em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .user-progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .progress-container {
+            flex: 1;
+            margin-left: 20px;
+        }
+        .progress-bar {
+            height: 10px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 5px 0;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 33%;
+        }
+        .progress-star {
+            position: absolute;
+            top: -10px;
+            font-size: 20px;
+            color: #f1c40f;
+            opacity: 0.3;
+        }
+        .progress-star.active {
+            opacity: 1;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .dashboard-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .dashboard-card h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .achievement-preview {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding: 10px 0;
+        }
+        .achievement-badge {
+            min-width: 60px;
+            height: 60px;
+            background-color: #ddd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+        .achievement-badge.unlocked {
+            background-color: #f1c40f;
+            color: white;
+        }
+        
+        .report-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        
+        .wrong-question {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f8d7da;
+            border-radius: 5px;
+            border-left: 3px solid #e74c3c;
+        }
+        
+        .chapter-selector {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            margin-top: 10px;
+        }
+        
+        .level-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .level-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        .level-card:hover {
+            transform: translateY(-5px);
+        }
+        .level-card.completed {
+            border-left: 5px solid #2ecc71;
+        }
+        .level-card.locked {
+            filter: grayscale(80%);
+            cursor: not-allowed;
+        }
+        .level-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #e74c3c;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+        }
+        .level-progress {
+            height: 5px;
+            background-color: #f1f1f1;
+            margin-top: 15px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .level-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 0%;
+        }
+        
+        .question-preview {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .game-container {
+            position: relative;
+        }
+        .question-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .question-image {
+            width: 100%;
+            max-width: 400px;
+            margin: 15px auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
+            background-color: white;
+        }
+        .question-image img {
+            width: 100%;
+            display: block;
+        }
+        .image-placeholder {
+            width: 100%;
+            height: 200px;
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.9em;
+        }
+        
+        .answer-input {
+            margin: 15px 0;
+            position: relative;
+        }
+        .answer-input input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            margin-top: 5px;
+        }
+        .answer-input label {
+            font-weight: bold;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            margin: 5px 0;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .success-message {
+            color: #2ecc71;
+            margin: 5px 0;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+        .btn:hover {
+            background-color: #c0392b;
+        }
+        .btn-secondary {
+            background-color: #3498db;
+        }
+        .btn-secondary:hover {
+            background-color: #2980b9;
+        }
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.8em;
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .back-button:hover {
+            background-color: #2980b9;
+        }
+
+        /* 数学公式样式 */
+        .katex { font-size: 1.1em; }
+        .math-formula {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+
+        /* 新增按钮交互样式 */
+        #submitAnswerBtn, #showSolutionBtn {
+            transition: all 0.3s;
+            position: relative;
+        }
+        #submitAnswerBtn:active {
+            transform: translateY(2px);
+        }
+        #submitAnswerBtn.loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        #submitAnswerBtn.loading::after {
+            content: "···";
+            position: absolute;
+            right: 15px;
+            animation: loadingDots 1.5s infinite;
+        }
+        @keyframes loadingDots {
+            0%, 20% { content: "·"; }
+            40% { content: "··"; }
+            60%, 100% { content: "···"; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 首页 -->
+    <div class="home-container" id="homePage">
+        <div class="header">
+            <h1>数学强国挑战赛</h1>
+            <p>用数学助力中国科技腾飞！</p>
+        </div>
+
+        <!-- 用户信息与进度 -->
+        <div class="user-progress">
+            <div class="avatar">
+                <img src="image/用户头像.JPG" alt="用户头像" style="width:100%;border-radius:50%">
+            </div>            
+            <div class="progress-container">
+                <h3>本章节进度</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="overallProgress"></div>
+                    <div class="progress-star" id="star1">★</div>
+                    <div class="progress-star" id="star2">★</div>
+                    <div class="progress-star" id="star3">★</div>
+                </div>
+                <p>已完成 <span id="completedCount">0</span>/<span id="totalCount">3</span> 个关卡</p>
+            </div>
+        </div>
+
+        <!-- 仪表盘 -->
+        <div class="dashboard">
+            <!-- 成就预览 -->
+            <div class="dashboard-card">
+                <h3>🏆 成就预览</h3>
+                <div class="achievement-preview">
+                    <div class="achievement-badge unlocked">⭐</div>
+                    <div class="achievement-badge">📶</div>
+                    <div class="achievement-badge">🚄</div>
+                    <div class="achievement-badge">🏅</div>
+                    <div class="achievement-badge">💯</div>
+                </div>
+                <button class="btn btn-secondary" onclick="showAchievements()">查看全部成就</button>
+            </div>
+            
+            <!-- 学习报告 -->
+            <div class="dashboard-card">
+                <h3>📊 学习报告</h3>
+                <div class="report-item">
+                    <span>正确率</span>
+                    <strong>75%</strong>
+                </div>
+                <div class="report-item">
+                    <span>平均用时</span>
+                    <strong>2分15秒</strong>
+                </div>
+                <div class="report-item">
+                    <span>本周学习</span>
+                    <strong>3小时</strong>
+                </div>
+                <button class="btn btn-secondary" onclick="showReport()">详细报告</button>
+            </div>
+            
+            <!-- 错题本 -->
+            <div class="dashboard-card">
+                <h3>🔍 最近错题</h3>
+                <div class="wrong-question">
+                    <p>求函数$f(x)=x+\frac{1}{x}$的最小值</p>
+                    <small>错误时间：2025-04-05</small>
+                </div>
+                <button class="btn btn-secondary" onclick="showWrongQuestions()">查看错题本</button>
+            </div>
+        </div>
+
+        <!-- 章节选择 -->
+        <div class="chapter-selector">
+            <h3>选择学习章节</h3>
+            <select id="chapterSelect">
+                <option value="inequality" selected>重要不等式</option>
+                <option value="function">函数与极限</option>
+                <option value="derivative">导数与应用</option>
+                <option value="integral">积分学</option>
+            </select>
+            <p id="chapterDesc">本章学习重要不等式及其应用</p>
+        </div>
+
+        <!-- 今日挑战 -->
+        <div class="chapter-selector" style="background-color: #fff9e6; border-left: 4px solid #f1c40f;">
+            <h3>📢 今日挑战 - <span id="currentChapter">重要不等式</span></h3>
+            <p>完成本章全部关卡可获得"不等式大师"成就！</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="chapterProgress" style="width: 0%;"></div>
+            </div>
+            <p>本章进度：<span id="progressText">0/3</span></p>
+        </div>
+
+        <!-- 关卡卡片 -->
+        <h2>选择挑战关卡</h2>
+        <div class="level-cards">
+            <div class="level-card" id="level1" onclick="startLevel(1)">
+                <div class="level-badge">进阶</div>
+                <h3>乘积最大值问题</h3>
+                <div class="question-preview">
+                    <p>大会标识中的阴阳悬臂代表数字$2$和$7$，乘积为$14$(届数)。</p>
+                    <p>若两数之和为$9$，求其积的最大值。</p>
+                </div>
+                <div class="level-progress">
+                    <div class="level-progress-fill" style="width:0%"></div>
+                </div>
+                <p>🔜 开始挑战</p>
+            </div>
+            
+            <div class="level-card" id="level2" onclick="startLevel(2)">
+                <div class="level-badge">基础</div>
+                <h3>半圆面积最大问题</h3>
+                <div class="question-preview">
+                    <p>如图，点$D$是以$AB$为直径($|AB|=3$)的半圆上的动点，当取得最大值时：</p>
+                    <ol type="a">
+                        <li>求面积的最大值</li>
+                        <li>求此时直线$AB$与直线$AD$夹角的余弦值</li>
+                    </ol>
+                </div>
+                <div class="level-progress">
+                    <div class="level-progress-fill" style="width:0%"></div>
+                </div>
+                <p>🔜 开始挑战</p>
+            </div>
+            
+            <div class="level-card" id="level3" onclick="startLevel(3)">
+                <div class="level-badge">挑战</div>
+                <h3>柯西不等式应用</h3>
+                <div class="question-preview">
+                    <p>利用柯西不等式：</p>
+                    <p>若$x + 2y + 3z = 1$，求$x^2 + y^2 + z^2$的最小值。</p>
+                </div>
+                <div class="level-progress">
+                    <div class="level-progress-fill" style="width:0%"></div>
+                </div>
+                <p>🔜 开始挑战</p>
+            </div>
+        </div>
+
+        <button class="btn btn-secondary" onclick="continueLastLevel()">继续上次挑战</button>
+        <button class="btn" onclick="startLevel(1)">从第一关开始</button>
+    </div>
+
+    <!-- 游戏页面容器（初始隐藏） -->
+    <div id="gameContainer" class="game-container" style="display:none;">
+        <!-- 游戏内容将通过JS动态加载 -->
+    </div>
+
+    <!-- 添加KaTeX JS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    
+    <script>
+        // 全局变量
+        window.currentLevel = 1;
+        const ENTER_KEYCODE = 13;
+
+        // 用户数据初始化
+        const initializeUserData = () => ({
+            name: "学员",
+            avatar: "成",
+            currentChapter: "inequality",
+            completedLevels: [],
+            lastPlayedLevel: 1,
+            scores: {1: 0, 2: 0, 3: 0},
+            achievements: {
+                "first_level": { unlocked: false, date: "" },
+                "inequality_master": { unlocked: false }
+            },
+            totalLevels: 3,
+            wrongAttempts: {1: 0, 2: 0, 3: 0}
+        });
+
+        let userData = initializeUserData();
+
+        // 正确答案
+        const correctAnswers = {
+            1: { value: "81/4", decimal: 20.25 },
+            2: {
+                a: { value: "9/4", decimal: 2.25 },
+                b: { value: "√2/2", decimal: 0.7071 }
+            },
+            3: { 
+                a: { value: "3", decimal: 3 },
+                b: { value: "9", decimal: 9 },
+                c: { value: "24", decimal: 24 }
+            }
+        };
+
+        // 章节数据
+        const chapters = {
+            "inequality": {
+                name: "重要不等式",
+                description: "本章学习均值不等式、柯西不等式等重要不等式及其在科技领域的应用",
+                levels: 3
+            },
+            "function": {
+                name: "函数与极限",
+                description: "掌握函数性质和极限计算方法",
+                levels: 4
+            },
+            "derivative": {
+                name: "导数与应用",
+                description: "学习导数计算及其在实际问题中的应用",
+                levels: 5
+            },
+            "integral": {
+                name: "积分学",
+                description: "理解积分概念和计算方法",
+                levels: 4
+            }
+        };
+
+        // 加载保存的数据
+        function loadUserData() {
+            try {
+                const savedData = localStorage.getItem('mathChallengeData');
+                if (savedData) {
+                    userData = {...initializeUserData(), ...JSON.parse(savedData)};
+                }
+            } catch (e) {
+                console.error('加载数据失败:', e);
+            }
+        }
+
+        // 保存数据
+        function saveUserData() {
+            try {
+                localStorage.setItem('mathChallengeData', JSON.stringify(userData));
+            } catch (e) {
+                console.error('保存数据失败:', e);
+            }
+        }
+
+        // 分数转换为小数
+        function fractionToDecimal(fraction) {
+            try {
+                if (!fraction) return null;
+                
+                // 处理根号形式
+                if (fraction.includes('√')) {
+                    const parts = fraction.split('√');
+                    const rootValue = parts[1].split('/')[0];
+                    const denominator = parts[1].includes('/') ? parts[1].split('/')[1] : 1;
+                    return (Math.sqrt(parseFloat(rootValue)) / parseFloat(denominator)).toFixed(4);
+                }
+                
+                // 处理分数形式
+                if (fraction.includes('/')) {
+                    const [numerator, denominator] = fraction.split('/');
+                    return parseFloat(numerator) / parseFloat(denominator);
+                }
+                
+                // 直接数字
+                return parseFloat(fraction);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // 检查两个数值是否近似相等
+        function isApproximatelyEqual(a, b, tolerance = 0.01) {
+            a = parseFloat(a);
+            b = parseFloat(b);
+            return Math.abs(a - b) < tolerance;
+        }
+
+        // 检查第三题第三问的答案
+        function checkAnswer3c(answer) {
+            if (!answer) return false;
+            
+            answer = answer.toLowerCase().trim();
+            const validAnswers = [
+                "24", 
+                "m<=24", "m ≤ 24", "m< =24",
+                "m小于等于24", "m不大于24",
+                "<=24", "≤24"
+            ];
+            
+            return validAnswers.includes(answer);
+        }
+
+        // 渲染数学公式
+        function renderMath() {
+            if (typeof renderMathInElement === 'function') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
+        }
+
+        // 更新星星显示
+        function updateStars() {
+            const completedCount = userData.completedLevels.length;
+            for (let i = 1; i <= 3; i++) {
+                const star = document.getElementById(`star${i}`);
+                if (star) {
+                    star.classList.toggle('active', i <= completedCount);
+                }
+            }
+        }
+
+        // 初始化首页
+        function initHomePage() {
+            loadUserData();
+            
+            // 更新章节信息
+            const currentChapter = chapters[userData.currentChapter];
+            document.getElementById("currentChapter").textContent = currentChapter.name;
+            document.getElementById("chapterDesc").textContent = currentChapter.description;
+            
+            // 更新进度
+            updateProgress();
+            
+            // 更新关卡状态
+            updateLevelCards();
+            
+            // 更新总进度
+            updateOverallProgress();
+            
+            // 更新星星
+            updateStars();
+            
+            // 渲染数学公式
+            setTimeout(renderMath, 50);
+        }
+
+        // 更新总体进度
+        function updateOverallProgress() {
+            const completed = userData.completedLevels.length;
+            const total = userData.totalLevels;
+            const percent = (completed / total) * 100;
+            
+            const progressBar = document.getElementById("overallProgress");
+            if (progressBar) {
+                progressBar.style.width = `${percent}%`;
+            }
+            
+            const completedCount = document.getElementById("completedCount");
+            if (completedCount) {
+                completedCount.textContent = completed;
+            }
+            
+            const totalCount = document.getElementById("totalCount");
+            if (totalCount) {
+                totalCount.textContent = total;
+            }
+        }
+
+        // 更新章节进度
+        function updateProgress() {
+            const currentChapter = chapters[userData.currentChapter];
+            const completed = userData.completedLevels.filter(l => l <= currentChapter.levels).length;
+            const percent = (completed / currentChapter.levels) * 100;
+            
+            const progressBar = document.getElementById("chapterProgress");
+            if (progressBar) {
+                progressBar.style.width = `${percent}%`;
+            }
+            
+            const progressText = document.getElementById("progressText");
+            if (progressText) {
+                progressText.textContent = `${completed}/${currentChapter.levels}`;
+            }
+        }
+
+        // 更新关卡卡片状态
+        function updateLevelCards() {
+            for (let i = 1; i <= 3; i++) {
+                const card = document.getElementById(`level${i}`);
+                if (!card) continue;
+                
+                const progress = card.querySelector('.level-progress-fill');
+                const statusText = card.querySelector("p:last-child");
+                
+                if (userData.completedLevels.includes(i)) {
+                    card.classList.add("completed");
+                    if (progress) progress.style.width = "100%";
+                    if (statusText) statusText.innerHTML = "⭐ 已完成";
+                } else {
+                    card.classList.remove("completed");
+                    const score = userData.scores[i] || 0;
+                    if (progress) progress.style.width = `${score}%`;
+                    if (statusText) {
+                        statusText.textContent = score > 0 
+                            ? `🏅 已得 ${score}分` 
+                            : "🔜 开始挑战";
+                    }
+                }
+            }
+        }
+
+        // 开始关卡
+        function startLevel(levelNum) {
+            window.currentLevel = levelNum;
+            userData.lastPlayedLevel = levelNum;
+            saveUserData();
+            
+            document.getElementById("homePage").style.display = "none";
+            const gameContainer = document.getElementById("gameContainer");
+            gameContainer.style.display = "block";
+            gameContainer.innerHTML = generateLevelHTML(levelNum);
+            
+            // 绑定回车键提交
+            document.querySelectorAll('.answer-input input').forEach(input => {
+                input.addEventListener('keypress', (e) => {
+                    if (e.keyCode === ENTER_KEYCODE) {
+                        checkAnswer(levelNum);
+                    }
+                });
+            });
+            
+            renderMath();
+        }
+
+        // 生成关卡HTML
+        function generateLevelHTML(levelNum) {
+            return `
+                <button class="back-button" id="backHomeBtn">← 返回首页</button>
+                <div class="question-card">
+                    <h2>第${levelNum}关：${getLevelTitle(levelNum)}</h2>
+                    ${generateQuestionContent(levelNum)}
+                    
+                    ${generateAnswerInputs(levelNum)}
+                    
+                    <button class="btn" id="submitAnswerBtn">提交答案</button>
+                    <div id="solutionButton${levelNum}" style="display:none;margin-top:10px;">
+                        <button class="btn btn-secondary" id="showSolutionBtn">显示解答</button>
+                    </div>
+                    
+                    <div id="solution${levelNum}" style="display:none; margin-top:20px; padding:15px; background:#f9f9f9; border-radius:5px;">
+                        ${generateSolutionContent(levelNum)}
+                    </div>
+                </div>
+            `;
+        }
+
+        // 获取关卡标题
+        function getLevelTitle(levelNum) {
+            const titles = {
+                1: "乘积最大值问题",
+                2: "半圆面积最大问题",
+                3: "柯西不等式应用"
+            };
+            return titles[levelNum] || `第${levelNum}关`;
+        }
+
+        // 生成问题内容
+        function generateQuestionContent(levelNum) {
+            const questions = {
+                1: `
+                    <p>大会标识中的阴阳悬臂代表数字$2$和$7$，乘积为$14$(届数)。若两数之和为$9$，求其积的最大值。</p>
+                `,
+                2: `
+                    <p>1．如图，点 $D$ 是以 $A B$ 为直径为 3 的半圆上的动点，当 $S_{\\triangle A B D}$ 取得最大值时</p>
+                    <div class="question-image">
+                        <img src="image/图片1.png" alt="半圆示意图">
+                    </div>
+                    <ol type="a">
+                        <li>求面积的最大值</li>
+                        <li>求此时直线 $A B$ 与直线 AD 夹角的余弦值</li>
+                    </ol>
+                `,
+                3: `
+                    <p>我们利用完全平方公式得出了一类重要不等式：$\\forall a, b \\in \\mathrm{R}, a^{2}+b^{2} \\geq 2 a b$ ，当且仅当 $a=b$ 时，等号成立．我们从不等式 $a^{2}+b^{2} \\geq 2 a b$ 出发，可以得到一个非常优美的不等式——柯西不等式，柯西不等式的一般形式为：$\\forall a_{1}, a_{2}, \\cdots, a_{n}, b_{1}, b_{2}, \\cdots, b_{n} \\in \\mathrm{R}$ ，且 $b_{1} b_{2} \\cdots b_{n} \\neq 0$ ， $\\left(a_{1}^{2}+a_{2}^{2}+\\cdots+a_{n}^{2}\\right)\\left(b_{1}^{2}+b_{2}^{2}+\\cdots+b_{n}^{2}\\right) \\geq\\left(a_{1} b_{1}+a_{2} b_{2}+\\cdots+a_{n} b_{n}\\right)^{2}$ ，当且仅当 $\\frac{a_{1}}{b_{1}}=\\frac{a_{2}}{b_{2}}=\\cdots=\\\\frac{a_{n}}{b_{n}}$ 时，等号成立。</p>
+                    <ol type="a">
+                        <li>若 $x+2 y+2 z=3 \\sqrt{3}$ ，求 $x^{2}+y^{2}+z^{2}$ 的最小值；</li>
+                        <li>求 $\\sqrt{x}+\\sqrt{3 x-32}+\\sqrt{17-x}$ 的最大值；（选做）</li>
+                        <li>若 $a>3, b>3$ ，不等式 $a^{3}+b^{3}-3 a^{2}-3 b^{2} \\geq m(a-3)(b-3)$ 恒成立，求 $m$ 的取值范围．（选做）</li>
+                    </ol>
+                `
+            };
+            return questions[levelNum] || '<p>问题内容加载中...</p>';
+        }
+
+        // 生成答案输入区域
+        function generateAnswerInputs(levelNum) {
+            const inputs = {
+                1: `
+                    <div class="answer-input">
+                        <label for="answer1">积的最大值：</label>
+                        <input type="text" id="answer1" placeholder="请输入答案（如81/4或20.25）">
+                        <div class="error-message" id="error1"></div>
+                        <div class="success-message" id="success1"></div>
+                    </div>
+                `,
+                2: `
+                    <div class="answer-input">
+                        <label for="answer2a">面积的最大值：</label>
+                        <input type="text" id="answer2a" placeholder="请输入答案（如9/4或2.25）">
+                        <div class="error-message" id="error2a"></div>
+                        <div class="success-message" id="success2a"></div>
+                    </div>
+                    <div class="answer-input">
+                        <label for="answer2b">余弦值：</label>
+                        <input type="text" id="answer2b" placeholder="请输入答案（如√2/2或0.71）">
+                        <div class="error-message" id="error2b"></div>
+                        <div class="success-message" id="success2b"></div>
+                    </div>
+                `,
+                3: `
+                    <div class="answer-input">
+                        <label for="answer3a">最小值：</label>
+                        <input type="text" id="answer3a" placeholder="请输入第一个答案">
+                        <div class="error-message" id="error3a"></div>
+                        <div class="success-message" id="success3a"></div>
+                    </div>
+                    <div class="answer-input">
+                        <label for="answer3b">最大值：</label>
+                        <input type="text" id="answer3b" placeholder="请输入第二个答案">
+                        <div class="error-message" id="error3b"></div>
+                        <div class="success-message" id="success3b"></div>
+                    </div>
+                    <div class="answer-input">
+                        <label for="answer3c">m的取值范围：</label>
+                        <input type="text" id="answer3c" placeholder="请输入24或m<=24或m小于等于24">
+                        <div class="error-message" id="error3c"></div>
+                        <div class="success-message" id="success3c"></div>
+                    </div>
+                `
+            };
+            return inputs[levelNum] || '';
+        }
+
+        // 生成解答内容
+        function generateSolutionContent(levelNum) {
+            const solutions = {
+                1: `
+                    <h4>解答：</h4>
+                    <p>根据重要不等式，$a b \\leq \\frac{(a+b)^{2}}{4}=\\frac{81}{4}$ ，当且仅当 $a=b=\\frac{9}{2}$ 时取等．</p>
+                    <p><strong>答案：</strong>积的最大值为$\\frac{81}{4}$(20.25)</p>
+                `,
+                2: `
+                    <h4>解答：</h4>
+                    <p>$\\because A B$ 为半圆的直径，$\\therefore B D \\perp A D$
+                        \\[\\therefore S_{\\triangle A B D}=\\frac{1}{2} B D \\cdot A D\\]
+根据重要不等式，有 $B D^{2}+A D^{2} \\geq 2 B D \\cdot A D$,
+$\\therefore S_{\\triangle A B D}=\\frac{1}{2} B D \\cdot A D \\leq \\frac{1}{4}\\left(B D^{2}+A D^{2}\\right)$ ．
+又 $\\because B D \\perp A D, \\therefore S_{\\triangle A B D}=\\\\frac{1}{2} B D \\cdot A D \\leq \\frac{1}{4}\\left(B D^{2}+A D^{2}\\right)=\\frac{1}{4} A B^{2}=\\\\frac{9}{4}$ ．
+当且仅当 $B D=A D=\\frac{3 \\sqrt{3}}{2}$ 时取等，此时三角形为等腰直角三角形，故 $\\cos A=\\frac{\\sqrt{2}}{2}$ ．</p>
+                   
+                    <p><strong>答案：</strong>面积的最大值为$\\frac{9}{4}$(2.25)，此时余弦值为$\\frac{\\\\sqrt{2}}{2}$(≈0.71)</p>
+                `,
+                3: `
+                    <h4>解答：</h4>
+                    <div class="math-formula">
+                        （1）由柯西不等式：$\\left(x^{2}+y^{2}+z^{2}\\right)\\left(1^{2}+2^{2}+2^{2}\\right) \\geq(x+2 y+2 z)^{2}=27$ ．
+$\\Rightarrow x^{2}+y^{2}+z^{2} \\geq 3$ ，当且仅当 $\\frac{x}{1}=\\frac{y}{2}=\\frac{z}{2}$ ，即 $y=z=\\frac{2 \\sqrt{3}}{3}, x=\\frac{\\sqrt{3}}{3}$ 时取等号．
+所以 $x^{2}+y^{2}+z^{2}$ 的最小值为 3 ．
+                    </div>
+                    <div class="math-formula">
+                        （2）因为柯西不等式可得 $[x+3 x-32+4(17-x)]\\left[1^{2}+1^{2}+\\left(\\frac{1}{2}\\right)^{2}\\right] \\geq(\\sqrt{x}+\\sqrt{3 x-32}+\\sqrt{17-x})^{2}$ ，
+又因为 $x+3 x-32+4(17-x)=36$ ，
+所以 $36\\left[1^{2}+1^{2}+\\left(\\frac{1}{2}\\right)^{2}\\right] \\geq(\\sqrt{x}+\\sqrt{3 x-32}+\\sqrt{17-x})^{2}$ ，
+即得 $(\\sqrt{x}+\\sqrt{3 x-32}+\\sqrt{17-x})^{2} \\leq 81$ ，化简得 $\\sqrt{x}+\\sqrt{3 x-32}+\\sqrt{17-x} \\leq 9$ ，
+当且仅当 $x=16$ 取最大值 9 ；
+                    </div>
+                    <div class="math-formula">
+                       （3）因为 $a^{3}+b^{3}-3 a^{2}-3 b^{2} \\geq m(a-3)(b-3)$ ，
+所以 $a^{2}(a-3)+b^{2}(b-3) \\geq m(a-3)(b-3)$ ，所以 $\\frac{a^{2}}{b-3}+\\frac{b^{2}}{a-3} \\geq m$ ，
+所以 $m \\leq\\left(\\frac{a^{2}}{b-3}+\\frac{b^{2}}{a-3}\\right)_{\\text {min }}$ ，因为柯西不等式可得 $\\left(\\frac{a^{2}}{b-3}+\\frac{b^{2}}{a-3}\\right)(b-3+a-3) \\geq(a+b)^{2}$ ，
+又因为 $a>3, b>3$ ，所以 $a+b>6$ ，令 $t=a+b-6$ ，
+所以 $\\left(\\frac{a^{2}}{b-3}+\\frac{b^{2}}{a-3}\\right) \\geq \\frac{(a+b)^{2}}{a+b-6}=\\frac{(t+6)^{2}}{t}=t+\\frac{36}{t}+12 \\geq 2 \\sqrt{t \\times \\frac{36}{t}}+12=24$ ，
+即得 $\\left(\\frac{a^{2}}{b-3}+\\frac{b^{2}}{a-3}\\right)_{\\text {min }}=24$ ，当且仅当 $a=b=6$ 取最小值 24 ；
+所以 $m$ 的取值范围是 $m \\leq 24$ ．
+                    </div>
+                    <p><strong>答案：（1）3  （2） 9  （3）$m \\leq 24$ </strong></p>
+                `
+            };
+            return solutions[levelNum] || '<p>解答内容加载中...</p>';
+        }
+
+        // 检查答案（核心修复部分）
+        async function checkAnswer(levelNum) {
+            const submitBtn = document.getElementById('submitAnswerBtn');
+            if (!submitBtn) return;
+
+            // 防止重复提交
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            // 模拟异步处理
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            try {
+                let allCorrect = true;
+                const answerData = getAnswersForLevel(levelNum);
+
+                // 验证每个答案
+                for (const [key, { value, decimal }] of Object.entries(answerData)) {
+                    const elementId = `answer${key}`;
+                    const inputElement = document.getElementById(elementId);
+                    
+                    if (!inputElement || !inputElement.value.trim()) {
+                        showValidationMessage(key, '请填写答案', 'error');
+                        allCorrect = false;
+                        continue;
+                    }
+
+                    const userAnswer = inputElement.value.trim();
+                    let isCorrect = false;
+                    
+                    if (levelNum === 3 && key === 'c') {
+                        isCorrect = checkAnswer3c(userAnswer);
+                    } else {
+                        const userDecimal = fractionToDecimal(userAnswer);
+                        isCorrect = userDecimal !== null && (
+                            isApproximatelyEqual(userDecimal, decimal) || 
+                            userAnswer === value
+                        );
+                    }
+
+                    if (!isCorrect) {
+                        recordWrongAttempt(levelNum);
+                        allCorrect = false;
+                    }
+
+                    showValidationMessage(
+                        key,
+                        isCorrect ? '✓ 答案正确！' : '✗ 答案错误，请再试一次',
+                        isCorrect ? 'success' : 'error'
+                    );
+                }
+
+                if (allCorrect) {
+                    completeLevel(levelNum);
+                } else if (userData.wrongAttempts[levelNum] >= 3) {
+                    document.getElementById(`solutionButton${levelNum}`).style.display = 'block';
+                }
+
+            } catch (error) {
+                console.error('检查答案出错:', error);
+                alert('处理答案时出错，请重试');
+            } finally {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
+        }
+
+        // 获取当前关卡的答案配置
+        function getAnswersForLevel(levelNum) {
+            const configs = {
+                1: {
+                    '1': { value: correctAnswers[1].value, decimal: correctAnswers[1].decimal }
+                },
+                2: {
+                    '2a': { value: correctAnswers[2].a.value, decimal: correctAnswers[2].a.decimal },
+                    '2b': { value: correctAnswers[2].b.value, decimal: correctAnswers[2].b.decimal }
+                },
+                3: {
+                    '3a': { value: correctAnswers[3].a.value, decimal: correctAnswers[3].a.decimal },
+                    '3b': { value: correctAnswers[3].b.value, decimal: correctAnswers[3].b.decimal },
+                    '3c': { value: correctAnswers[3].c.value, decimal: correctAnswers[3].c.decimal }
+                }
+            };
+            return configs[levelNum] || {};
+        }
+
+        // 显示验证消息
+        function showValidationMessage(prefix, message, type) {
+            const errorEl = document.getElementById(`error${prefix}`);
+            const successEl = document.getElementById(`success${prefix}`);
+            
+            if (type === 'error') {
+                if (errorEl) {
+                    errorEl.textContent = message;
+                    errorEl.style.display = 'block';
+                }
+                if (successEl) successEl.style.display = 'none';
+            } else {
+                if (successEl) {
+                    successEl.textContent = message;
+                    successEl.style.display = 'block';
+                }
+                if (errorEl) errorEl.style.display = 'none';
+            }
+        }
+
+        // 记录错误尝试
+        function recordWrongAttempt(levelNum) {
+            if (!userData.wrongAttempts[levelNum]) {
+                userData.wrongAttempts[levelNum] = 1;
+            } else {
+                userData.wrongAttempts[levelNum]++;
+            }
+            saveUserData();
+        }
+
+        // 完成关卡
+        function completeLevel(levelNum) {
+            if (!userData.completedLevels.includes(levelNum)) {
+                userData.completedLevels.push(levelNum);
+                userData.scores[levelNum] = 100;
+                
+                // 解锁首个成就
+                if (levelNum === 1 && !userData.achievements.first_level.unlocked) {
+                    userData.achievements.first_level.unlocked = true;
+                    userData.achievements.first_level.date = new Date().toLocaleDateString();
+                }
+                
+                // 检查是否完成所有关卡
+                if (userData.completedLevels.length === 3) {
+                    userData.achievements.inequality_master.unlocked = true;
+                }
+                
+                saveUserData();
+                
+                setTimeout(() => {
+                    alert(`🎉 恭喜您完成第 ${levelNum} 关！`);
+                    document.getElementById("homePage").style.display = "block";
+                    document.getElementById("gameContainer").style.display = "none";
+                    initHomePage();
+                }, 500);
+            }
+        }
+
+        // 继续上次关卡
+        function continueLastLevel() {
+            startLevel(userData.lastPlayedLevel);
+        }
+
+        // 显示成就系统
+        function showAchievements() {
+            alert("显示完整成就系统");
+        }
+
+        // 显示学习报告
+        function showReport() {
+            alert("显示详细学习报告");
+        }
+
+        // 显示错题本
+        function showWrongQuestions() {
+            alert("显示完整错题本");
+        }
+
+        // 事件监听（修复点击无反应的关键）
+        document.addEventListener('click', function(e) {
+            // 返回按钮
+            if (e.target.id === 'backHomeBtn' || e.target.closest('#backHomeBtn')) {
+                document.getElementById("homePage").style.display = "block";
+                document.getElementById("gameContainer").style.display = "none";
+                initHomePage();
+                return;
+            }
+            
+            // 提交答案按钮（包括事件委托）
+            if (e.target.id === 'submitAnswerBtn' || e.target.closest('#submitAnswerBtn')) {
+                checkAnswer(window.currentLevel);
+                return;
+            }
+            
+            // 显示解答按钮
+            if (e.target.id === 'showSolutionBtn' || e.target.closest('#showSolutionBtn')) {
+                const solution = document.getElementById(`solution${window.currentLevel}`);
+                if (solution) {
+                    solution.style.display = solution.style.display === 'none' ? 'block' : 'none';
+                    if (solution.style.display === 'block') {
+                        renderMath();
+                    }
+                }
+            }
+            
+            // 关卡卡片点击
+            const levelCard = e.target.closest('.level-card');
+            if (levelCard && !levelCard.classList.contains('locked')) {
+                const levelNum = parseInt(levelCard.id.replace('level', ''));
+                if (!isNaN(levelNum)) {
+                    startLevel(levelNum);
+                }
+            }
+        });
+
+        // 页面加载初始化
+        window.onload = function() {
+            initHomePage();
+            
+            // 章节选择变化
+            document.getElementById("chapterSelect")?.addEventListener("change", function() {
+                userData.currentChapter = this.value;
+                saveUserData();
+                updateUI();
+            });
+        };
+
+        // 初始化UI状态
+        function updateUI() {
+            document.getElementById("currentChapter").textContent = 
+                chapters[userData.currentChapter].name;
+            document.getElementById("chapterDesc").textContent = 
+                chapters[userData.currentChapter].description;
+            
+            updateProgress();
+            updateLevelCards();
+            updateOverallProgress();
+            updateStars();
+        }
+    </script>
+</body>
+</html>
